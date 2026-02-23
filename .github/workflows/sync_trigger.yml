@@ -1,32 +1,31 @@
 name: 15天自动同步并构建
 
 permissions:
-  actions: write # 必须开启，用于“按”其他脚本的按钮
+  actions: write 
 
 on:
   schedule:
-    # 每月 1 号和 16 号 00:00 (UTC) 执行
     - cron: "0 0 1,16 * *"
-  workflow_dispatch: # 保留手动测试按钮
+  workflow_dispatch: 
 
 jobs:
   automation:
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
     steps:
-      - name: 1. 触发同步任务 (sync.yml)
+      - name: 1. 触发同步任务
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "正在启动同步..."
-          gh workflow run sync.yml
+          # 请确保下面这个文件名和你左侧列表里的同步脚本文件名完全一致
+          # 如果你的同步脚本叫 main.yml，请把 sync.yml 改成 main.yml
+          gh workflow run sync.yml 
           
       - name: 2. 等待同步完成
-        run: sleep 60s # 稍等 1 分钟，确保同步操作先跑完
+        run: sleep 60s 
 
       - name: 3. 触发构建任务 (oc.yml)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "正在启动 OpenClash 构建..."
           gh workflow run oc.yml
