@@ -1,19 +1,22 @@
 name: 15天自动同步并构建
 
 permissions:
-  actions: write # 关键权限：允许此脚本启动其他脚本
+  actions: write
 
 on:
   schedule:
-    # 每月 1 号和 16 号 00:00 (UTC) 自动运行
     - cron: "0 0 1,16 * *"
-  workflow_dispatch: # 保留手动按钮
+  workflow_dispatch:
 
 jobs:
   automation:
     runs-on: ubuntu-latest
     if: ${{ github.event.repository.fork }}
     steps:
+      # 新增的最关键一步：先检出仓库，让服务器知道当前是在哪个仓库操作
+      - name: 0. 检出当前仓库
+        uses: actions/checkout@v4
+
       - name: 1. 启动同步 (sync.yml)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,7 +25,6 @@ jobs:
           gh workflow run sync.yml
           
       - name: 2. 预留同步时间
-        # 等待 60 秒，确保上游代码完全同步到你的仓库
         run: sleep 60s 
 
       - name: 3. 启动构建 (oc.yml)
