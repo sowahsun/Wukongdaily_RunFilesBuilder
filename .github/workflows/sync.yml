@@ -1,0 +1,27 @@
+name: Upstream Sync
+
+permissions:
+  contents: write
+
+on:
+  workflow_dispatch: # 保持纯净，仅手动触发
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Sync upstream
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4
+        with:
+          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          upstream_checkout_branch: master
+          target_branch: master
+          upstream_repo: wukongdaily/RunFilesBuilder
